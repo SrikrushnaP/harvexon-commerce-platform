@@ -159,10 +159,17 @@ import { AddressService, Address } from '../../services/address.service';
         <textarea class="notes-input" placeholder="Any special instructions..." [value]="notes()" (input)="notes.set($any($event.target).value)" rows="3"></textarea>
       </section>
 
+      @if (!isAddressServiceable()) {
+        <div class="serviceability-warning">
+          <span class="warning-icon">⚠️</span>
+          <span>Sorry, we don't deliver to this pincode yet. Please select a different address or add one with a serviceable pincode.</span>
+        </div>
+      }
+
       @if (error()) { <div class="error-banner">{{ error() }}</div> }
 
       <div class="order-btn-spacer"></div>
-      <button class="place-order-btn" (click)="placeOrder()" [disabled]="placing() || !selectedAddressId()">
+      <button class="place-order-btn" (click)="placeOrder()" [disabled]="placing() || !selectedAddressId() || !isAddressServiceable()">
         @if (placing()) { <span class="spinner"></span> Placing... }
         @else { Place Order &rarr; <span class="price-pill">{{ settings.currencySymbol() }}{{ totalAmount() }}</span> }
       </button>
@@ -242,6 +249,8 @@ import { AddressService, Address } from '../../services/address.service';
     .notes-input { width: 100%; padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 0.9rem; resize: vertical; outline: none; font-family: inherit; box-sizing: border-box; }
     .notes-input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.1); }
     .error-banner { padding: 12px 16px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; color: #dc2626; font-size: 0.85rem; margin-bottom: 16px; }
+    .serviceability-warning { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; color: #92400e; font-size: 0.85rem; margin-bottom: 16px; line-height: 1.4; }
+    .warning-icon { font-size: 1.1rem; flex-shrink: 0; }
     .order-btn-spacer { height: 20px; }
     .place-order-btn { position: fixed; bottom: calc(var(--bottom-nav-height, 64px) + 12px); left: 16px; right: 16px; max-width: 568px; margin: 0 auto; padding: 16px 24px; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 4px 20px rgba(34,197,94,0.35); z-index: 90; }
     .place-order-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(34,197,94,0.45); }
@@ -295,6 +304,15 @@ export class CheckoutPage implements OnInit {
   editingAddressId = signal<string>('');
   placing = signal<boolean>(false);
   error = signal<string>('');
+
+  // Serviceability check
+  isAddressServiceable = computed(() => {
+    const pincodes = this.settings.serviceablePincodes();
+    if (pincodes.length === 0) return true; // no restriction if list is empty
+    const selected = this.addresses().find(a => a.id === this.selectedAddressId());
+    if (!selected) return true; // no address selected yet
+    return pincodes.includes(selected.pincode);
+  });
 
   paymentMethods = [
     { value: 'cod', label: 'Cash on Delivery', icon: '💵' },

@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ApiService } from '@frontend/shared-data-access';
 import { CartService } from '../../services/cart.service';
 import { SettingsService } from '../../services/settings.service';
@@ -580,6 +580,7 @@ interface Product {
 export class CatalogPage implements OnInit {
   private api = inject(ApiService);
   private cart = inject(CartService);
+  private route = inject(ActivatedRoute);
   settings = inject(SettingsService);
 
   products = signal<Product[]>([]);
@@ -626,6 +627,8 @@ export class CatalogPage implements OnInit {
   });
 
   ngOnInit(): void {
+    const categorySlug = this.route.snapshot.queryParamMap.get('category') || '';
+
     this.api.getPaginated<Product>('/catalog/products').subscribe({
       next: (response) => {
         this.products.set(response.data);
@@ -638,7 +641,17 @@ export class CatalogPage implements OnInit {
 
     this.api.get<any>('/catalog/categories').subscribe({
       next: (res) => {
-        this.categories.set(res.data || []);
+        const cats = res.data || [];
+        this.categories.set(cats);
+        // Auto-select category from query param
+        if (categorySlug) {
+          const match = cats.find((c: Category) =>
+            c.slug === categorySlug || c.name.toLowerCase() === categorySlug.toLowerCase()
+          );
+          if (match) {
+            this.selectedCategory.set(match.id);
+          }
+        }
       }
     });
   }

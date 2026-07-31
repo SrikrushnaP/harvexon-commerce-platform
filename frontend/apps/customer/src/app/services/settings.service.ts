@@ -14,7 +14,7 @@ export class SettingsService {
   minOrderAmount = signal<number>(0);
   acceptOrders = signal<boolean>(true);
   deliveryMessage = signal<string>('');
-
+  serviceablePincodes = signal<string[]>([]);
   constructor() {
     this.loadSettings();
   }
@@ -35,6 +35,7 @@ export class SettingsService {
             this.minOrderAmount.set(data.orderSettings.minOrderAmount ?? 0);
             this.acceptOrders.set(data.orderSettings.acceptOrders ?? true);
             this.deliveryMessage.set(data.orderSettings.deliveryMessage ?? '');
+            this.serviceablePincodes.set(data.orderSettings.serviceablePincodes ?? []);
           }
         }
       }

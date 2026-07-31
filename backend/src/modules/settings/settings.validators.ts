@@ -49,6 +49,7 @@ export const createSettingsSchema = z.object({
       acceptOrders: z.boolean().optional(),
       orderCutoffTime: z.string().optional(),
       deliveryMessage: z.string().max(200).trim().optional(),
+      serviceablePincodes: z.array(z.string().trim().min(4).max(10)).optional(),
     }).optional(),
 
     notifications: z.object({
@@ -104,6 +105,7 @@ export const updateSettingsSchema = z.object({
       acceptOrders: z.boolean().optional(),
       orderCutoffTime: z.string().optional(),
       deliveryMessage: z.string().max(200).trim().optional(),
+      serviceablePincodes: z.array(z.string().trim().min(4).max(10)).optional(),
     }).optional(),
 
     notifications: z.object({

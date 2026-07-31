@@ -54,6 +54,7 @@ export interface ISettings extends Document {
     acceptOrders: boolean;
     orderCutoffTime?: string; // e.g., "22:00" — no orders after this time
     deliveryMessage?: string; // e.g., "Delivery within 2 hours" — shown on catalog page
+    serviceablePincodes: string[]; // list of pincodes where delivery is available
   };
 
   // Notifications
@@ -120,6 +121,7 @@ const settingsSchema = new Schema<ISettings>({
     acceptOrders: { type: Boolean, default: true },
     orderCutoffTime: { type: String },
     deliveryMessage: { type: String, trim: true },
+    serviceablePincodes: { type: [String], default: [] },
   },
 
   notifications: {

@@ -48,6 +48,10 @@ export const appRoutes: Route[] = [
         path: 'settings',
         loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage),
       },
+      {
+        path: 'banners',
+        loadComponent: () => import('./pages/banners/banners.page').then(m => m.BannersPage),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

@@ -95,6 +95,7 @@ class SettingsService {
         acceptOrders: settings.orderSettings.acceptOrders,
         orderCutoffTime: settings.orderSettings.orderCutoffTime,
         deliveryMessage: settings.orderSettings.deliveryMessage,
+        serviceablePincodes: settings.orderSettings.serviceablePincodes || [],
       },
     } as Partial<ISettings>;
   }

@@ -18,6 +18,7 @@ import { deliveryRoutes } from './modules/delivery';
 import { uploadRoutes } from './modules/upload';
 import { invoiceRoutes } from './modules/invoice';
 import { analyticsRoutes } from './modules/analytics';
+import { bannerRoutes } from './modules/banner';
 import { couponRoutes } from './modules/coupon';
 import { cartRoutes } from './modules/cart';
 
@@ -78,6 +79,7 @@ app.use('/api/delivery', deliveryRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/invoice', invoiceRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/banners', bannerRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/cart', cartRoutes);
 

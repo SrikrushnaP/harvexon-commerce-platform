@@ -190,6 +190,32 @@ interface CustomerOption {
             </div>
           </form>
         </div>
+
+        <div class="card">
+          <h2>Serviceable Pincodes</h2>
+          <p class="card-description">Add pincodes where you deliver. If empty, all pincodes are accepted.</p>
+          <div class="pincode-input-row">
+            <input
+              type="text"
+              placeholder="Enter pincode (e.g. 560001)"
+              [value]="newPincode()"
+              (input)="newPincode.set($any($event.target).value)"
+              (keydown.enter)="addPincode(); $event.preventDefault()"
+              maxlength="10"
+            />
+            <button (click)="addPincode()" class="btn btn-primary btn-sm">+ Add</button>
+          </div>
+          <div class="pincode-list">
+            @for (pin of serviceablePincodes(); track pin) {
+              <span class="pincode-chip">
+                {{ pin }}
+                <button (click)="removePincode(pin)" class="chip-remove" title="Remove">×</button>
+              </span>
+            } @empty {
+              <span class="pincode-empty">No pincodes configured — all areas are serviceable</span>
+            }
+          </div>
+        </div>
       }
 
       <!-- INVOICE TAB -->
@@ -511,6 +537,21 @@ interface CustomerOption {
     .danger-zone { border: 1px solid #fecaca; }
     .danger-zone h2 { color: #dc2626; }
     .danger-text { color: #64748b; font-size: 0.875rem; margin: 0 0 1rem; }
+    .card-description { color: #64748b; font-size: 0.85rem; margin: -0.75rem 0 1rem; }
+    .pincode-input-row { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .pincode-input-row input { flex: 1; max-width: 240px; }
+    .pincode-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .pincode-chip {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;
+      padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500;
+    }
+    .chip-remove {
+      background: none; border: none; cursor: pointer; font-size: 1.1rem; line-height: 1;
+      color: #dc2626; padding: 0 0.15rem; border-radius: 3px;
+      &:hover { background: #fee2e2; }
+    }
+    .pincode-empty { color: #94a3b8; font-size: 0.85rem; font-style: italic; }
     .btn-danger {
       display: inline-flex; align-items: center; gap: 0.5rem;
       background: #dc2626; color: #fff; padding: 0.6rem 1.2rem; border-radius: 8px;
@@ -579,6 +620,10 @@ export class SettingsPage implements OnInit {
     orderCutoffTime: [''],
   });
 
+  // Serviceable pincodes
+  serviceablePincodes = signal<string[]>([]);
+  newPincode = signal<string>('');
+
   invoiceForm = this.fb.group({
     invoicePrefix: [''],
     invoiceStartNumber: [1],
@@ -645,6 +690,7 @@ export class SettingsPage implements OnInit {
           acceptOrders: s.orderSettings?.acceptOrders ?? true,
           orderCutoffTime: s.orderSettings?.orderCutoffTime || '',
         });
+        this.serviceablePincodes.set(s.orderSettings?.serviceablePincodes || []);
         this.invoiceForm.patchValue({
           invoicePrefix: s.invoicePrefix || '',
           invoiceStartNumber: s.invoiceStartNumber || 1,
@@ -681,7 +727,10 @@ export class SettingsPage implements OnInit {
       invoiceStartNumber: this.invoiceForm.value.invoiceStartNumber,
       gstNumber: this.invoiceForm.value.gstNumber,
       panNumber: this.invoiceForm.value.panNumber,
-      orderSettings: this.orderForm.value,
+      orderSettings: {
+        ...this.orderForm.value,
+        serviceablePincodes: this.serviceablePincodes(),
+      },
       notifications: this.notificationsForm.value,
     };
 
@@ -822,5 +871,25 @@ export class SettingsPage implements OnInit {
 
   handleLogout() {
     this.auth.logout();
+  }
+
+  // --- Serviceable Pincodes ---
+
+  addPincode() {
+    const pin = this.newPincode().trim();
+    if (!pin || pin.length < 4) return;
+    const current = this.serviceablePincodes();
+    if (current.includes(pin)) {
+      this.newPincode.set('');
+      return;
+    }
+    this.serviceablePincodes.set([...current, pin]);
+    this.newPincode.set('');
+    this.markDirty();
+  }
+
+  removePincode(pin: string) {
+    this.serviceablePincodes.set(this.serviceablePincodes().filter(p => p !== pin));
+    this.markDirty();
   }
 }
