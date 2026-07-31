@@ -18,6 +18,7 @@ import { deliveryRoutes } from './modules/delivery';
 import { uploadRoutes } from './modules/upload';
 import { invoiceRoutes } from './modules/invoice';
 import { analyticsRoutes } from './modules/analytics';
+import { couponRoutes } from './modules/coupon';
 
 const app: Application = express();
 
@@ -76,6 +77,7 @@ app.use('/api/delivery', deliveryRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/invoice', invoiceRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/coupons', couponRoutes);
 
 // 404 handler
 app.use((_req, res) => {

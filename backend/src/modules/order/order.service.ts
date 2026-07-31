@@ -3,6 +3,7 @@ import { Customer } from '../customer';
 import { Address } from '../customer';
 import { Product } from '../catalog';
 import { pricingService } from '../pricing';
+import { couponService } from '../coupon/coupon.service';
 import { Settings } from '../settings/settings.model';
 import { NotFoundError, ValidationError } from '../../common/middleware';
 import { parsePagination, buildPaginationMeta } from '../../common/utils';
@@ -49,6 +50,7 @@ interface CreateOrderData {
   paymentMethod: 'cash' | 'cod' | 'upi' | 'bank_transfer' | 'credit';
   notes?: string;
   discount?: number;
+  couponCode?: string;
 }
 
 interface OrderQuery extends PaginationQuery {
@@ -121,8 +123,39 @@ class OrderService {
     // Apply discount
     const discount = data.discount || 0;
 
+    // Apply coupon if provided
+    let couponCode: string | undefined;
+    let couponId: string | undefined;
+    let couponDiscount = 0;
+
+    if (data.couponCode) {
+      const cartItems = resolvedItems.map((item: any) => ({
+        product: item.product.toString(),
+        quantity: item.quantity,
+        price: item.price,
+        total: item.total,
+      }));
+
+      const { coupon } = await couponService.validateCoupon(
+        data.couponCode,
+        data.customer,
+        cartItems,
+        subtotal
+      );
+
+      couponDiscount = couponService.calculateDiscount(
+        coupon,
+        cartItems,
+        subtotal,
+        deliveryCharge
+      );
+
+      couponCode = coupon.code;
+      couponId = coupon.id;
+    }
+
     // Calculate total
-    const total = subtotal + deliveryCharge - discount;
+    const total = subtotal + deliveryCharge - discount - couponDiscount;
 
     // Generate order number
     const orderNumber = await this.generateOrderNumber();
@@ -137,6 +170,9 @@ class OrderService {
       subtotal,
       deliveryCharge,
       discount,
+      couponCode,
+      couponId,
+      couponDiscount,
       total,
       paymentMethod: data.paymentMethod,
       paymentStatus: 'pending',
@@ -153,6 +189,11 @@ class OrderService {
       ],
       createdBy: userId,
     });
+
+    // Record coupon usage
+    if (couponId) {
+      await couponService.applyCoupon(couponId, data.customer, order.id);
+    }
 
     return order.populate([
       { path: 'customer', select: 'name phone email' },

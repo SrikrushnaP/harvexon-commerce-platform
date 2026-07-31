@@ -71,4 +71,5 @@ export type {
   DeliveryStatus,
   CustomerGroupType,
   PricingType,
+  CouponType,
 } from './constants';

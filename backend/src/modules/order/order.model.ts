@@ -42,6 +42,9 @@ export interface IOrder extends Document {
   subtotal: number;
   deliveryCharge: number;
   discount: number;
+  couponCode?: string;
+  couponId?: Schema.Types.ObjectId;
+  couponDiscount: number;
   total: number;
   paymentMethod: 'cash' | 'cod' | 'upi' | 'bank_transfer' | 'credit';
   paymentStatus: 'pending' | 'partial' | 'paid';
@@ -169,6 +172,19 @@ const orderSchema = new Schema<IOrder>({
     type: Number,
     default: 0,
     min: [0, 'Discount cannot be negative'],
+  },
+  couponCode: {
+    type: String,
+    trim: true,
+  },
+  couponId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Coupon',
+  },
+  couponDiscount: {
+    type: Number,
+    default: 0,
+    min: [0, 'Coupon discount cannot be negative'],
   },
   total: {
     type: Number,

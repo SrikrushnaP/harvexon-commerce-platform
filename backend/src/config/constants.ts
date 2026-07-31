@@ -69,6 +69,16 @@ export const APP_CONSTANTS = {
     QUANTITY_SLAB: 'quantity_slab',
   } as const,
 
+  // Coupon types
+  COUPON_TYPE: {
+    PERCENTAGE: 'percentage',
+    FLAT: 'flat',
+    PRODUCT_SPECIAL_PRICE: 'product_special_price',
+    BUY_X_GET_Y: 'buy_x_get_y',
+    FREE_DELIVERY: 'free_delivery',
+    FIRST_ORDER: 'first_order',
+  } as const,
+
   // File upload
   ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
   MAX_IMAGES_PER_PRODUCT: 5,
@@ -81,3 +91,4 @@ export type InventoryTransactionType = (typeof APP_CONSTANTS.INVENTORY_TRANSACTI
 export type DeliveryStatus = (typeof APP_CONSTANTS.DELIVERY_STATUS)[keyof typeof APP_CONSTANTS.DELIVERY_STATUS];
 export type CustomerGroupType = (typeof APP_CONSTANTS.CUSTOMER_GROUP_TYPE)[keyof typeof APP_CONSTANTS.CUSTOMER_GROUP_TYPE];
 export type PricingType = (typeof APP_CONSTANTS.PRICING_TYPE)[keyof typeof APP_CONSTANTS.PRICING_TYPE];
+export type CouponType = (typeof APP_CONSTANTS.COUPON_TYPE)[keyof typeof APP_CONSTANTS.COUPON_TYPE];
