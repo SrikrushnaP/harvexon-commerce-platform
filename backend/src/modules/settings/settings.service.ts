@@ -94,6 +94,7 @@ class SettingsService {
         freeDeliveryAbove: settings.orderSettings.freeDeliveryAbove,
         acceptOrders: settings.orderSettings.acceptOrders,
         orderCutoffTime: settings.orderSettings.orderCutoffTime,
+        deliveryMessage: settings.orderSettings.deliveryMessage,
       },
     } as Partial<ISettings>;
   }

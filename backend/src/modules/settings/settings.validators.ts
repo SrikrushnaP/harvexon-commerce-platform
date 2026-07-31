@@ -48,6 +48,7 @@ export const createSettingsSchema = z.object({
       freeDeliveryAbove: z.number().min(0).optional(),
       acceptOrders: z.boolean().optional(),
       orderCutoffTime: z.string().optional(),
+      deliveryMessage: z.string().max(200).trim().optional(),
     }).optional(),
 
     notifications: z.object({
@@ -102,6 +103,7 @@ export const updateSettingsSchema = z.object({
       freeDeliveryAbove: z.number().min(0).optional(),
       acceptOrders: z.boolean().optional(),
       orderCutoffTime: z.string().optional(),
+      deliveryMessage: z.string().max(200).trim().optional(),
     }).optional(),
 
     notifications: z.object({

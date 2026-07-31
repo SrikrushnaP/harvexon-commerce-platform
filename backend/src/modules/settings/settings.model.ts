@@ -53,6 +53,7 @@ export interface ISettings extends Document {
     freeDeliveryAbove: number;
     acceptOrders: boolean;
     orderCutoffTime?: string; // e.g., "22:00" — no orders after this time
+    deliveryMessage?: string; // e.g., "Delivery within 2 hours" — shown on catalog page
   };
 
   // Notifications
@@ -118,6 +119,7 @@ const settingsSchema = new Schema<ISettings>({
     freeDeliveryAbove: { type: Number, default: 0 },
     acceptOrders: { type: Boolean, default: true },
     orderCutoffTime: { type: String },
+    deliveryMessage: { type: String, trim: true },
   },
 
   notifications: {

@@ -23,6 +23,7 @@ import { Order } from '../modules/order/order.model';
 import { DeliveryStaff } from '../modules/delivery/delivery-staff.model';
 import { DeliveryAssignment } from '../modules/delivery/delivery-assignment.model';
 import { InventoryTransaction } from '../modules/inventory/inventory-transaction.model';
+import { Settings } from '../modules/settings/settings.model';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -315,9 +316,9 @@ async function seedProducts(categories: any[], units: any[]) {
     { name: 'Pumpkin (Kaddu)', slug: 'pumpkin-kaddu', sku: 'VEG-GD-004', description: 'Orange pumpkin, sweet and nutritious', category: catMap['gourds-squash'], unit: kg, basePrice: 30, tags: ['sweet', 'seasonal'], lowStockThreshold: 20 },
 
     // Exotic Vegetables
-    { name: 'Broccoli', slug: 'broccoli', sku: 'VEG-EX-001', description: 'Fresh broccoli florets, imported quality', category: catMap['exotic-vegetables'], unit: pc, basePrice: 90, isFeatured: true, tags: ['healthy', 'protein'], lowStockThreshold: 15 },
+    { name: 'Broccoli', slug: 'broccoli', sku: 'VEG-EX-001', description: 'Fresh broccoli florets, imported quality', category: catMap['exotic-vegetables'], unit: pc, basePrice: 90, isFeatured: true, tags: ['healthy', 'protein', 'discount:15'], lowStockThreshold: 15 },
     { name: 'Zucchini', slug: 'zucchini', sku: 'VEG-EX-002', description: 'Green zucchini, perfect for grilling and pasta', category: catMap['exotic-vegetables'], unit: kg, basePrice: 120, tags: ['diet', 'western'], lowStockThreshold: 10 },
-    { name: 'Bell Pepper (Shimla Mirch)', slug: 'bell-pepper', sku: 'VEG-EX-003', description: 'Mixed colored bell peppers - red, yellow, green', category: catMap['exotic-vegetables'], unit: kg, basePrice: 150, isFeatured: true, tags: ['colorful', 'salad'], lowStockThreshold: 15 },
+    { name: 'Bell Pepper (Shimla Mirch)', slug: 'bell-pepper', sku: 'VEG-EX-003', description: 'Mixed colored bell peppers - red, yellow, green', category: catMap['exotic-vegetables'], unit: kg, basePrice: 150, isFeatured: true, tags: ['colorful', 'salad', 'discount:12'], lowStockThreshold: 15 },
     { name: 'Mushroom (Button)', slug: 'mushroom-button', sku: 'VEG-EX-004', description: 'Fresh button mushrooms, 200g pack', category: catMap['exotic-vegetables'], unit: pkt, basePrice: 60, tags: ['protein', 'stir-fry'], lowStockThreshold: 20 },
     { name: 'Baby Corn', slug: 'baby-corn', sku: 'VEG-EX-005', description: 'Tender baby corn sticks, great for Chinese cooking', category: catMap['exotic-vegetables'], unit: pkt, basePrice: 55, tags: ['chinese', 'stir-fry'], lowStockThreshold: 15 },
 
@@ -328,9 +329,9 @@ async function seedProducts(categories: any[], units: any[]) {
 
     // Fruits
     { name: 'Banana (Kela)', slug: 'banana-kela', sku: 'FRT-001', description: 'Ripe yellow bananas, Robusta variety', category: catMap['fruits'], unit: dz, basePrice: 50, isFeatured: true, tags: ['everyday', 'energy'], lowStockThreshold: 50 },
-    { name: 'Apple (Shimla)', slug: 'apple-shimla', sku: 'FRT-002', description: 'Red delicious apples from Himachal', category: catMap['fruits'], unit: kg, basePrice: 180, tags: ['premium', 'healthy'], lowStockThreshold: 30 },
+    { name: 'Apple (Shimla)', slug: 'apple-shimla', sku: 'FRT-002', description: 'Red delicious apples from Himachal', category: catMap['fruits'], unit: kg, basePrice: 180, tags: ['premium', 'healthy', 'discount:10'], lowStockThreshold: 30 },
     { name: 'Papaya', slug: 'papaya', sku: 'FRT-003', description: 'Ripe papaya, sweet and nutritious', category: catMap['fruits'], unit: pc, basePrice: 60, tags: ['digestive', 'tropical'], lowStockThreshold: 20 },
-    { name: 'Pomegranate (Anar)', slug: 'pomegranate-anar', sku: 'FRT-004', description: 'Juicy red pomegranates, seedless variety', category: catMap['fruits'], unit: kg, basePrice: 220, tags: ['premium', 'juice'], lowStockThreshold: 15 },
+    { name: 'Pomegranate (Anar)', slug: 'pomegranate-anar', sku: 'FRT-004', description: 'Juicy red pomegranates, seedless variety', category: catMap['fruits'], unit: kg, basePrice: 220, tags: ['premium', 'juice', 'discount:20'], lowStockThreshold: 15 },
 
     // Dairy & Eggs
     { name: 'Farm Fresh Eggs', slug: 'farm-fresh-eggs', sku: 'DRY-001', description: 'Free-range eggs, pack of 6', category: catMap['dairy-eggs'], unit: pkt, basePrice: 60, isFeatured: true, tags: ['protein', 'breakfast'], lowStockThreshold: 40 },
@@ -344,9 +345,46 @@ async function seedProducts(categories: any[], units: any[]) {
   ];
 
   // Add default fields
+  const imageMap: Record<string, string> = {
+    'fresh-spinach': '/images/products/spinach.jpg',
+    'methi-fenugreek': '/images/products/methi.jpg',
+    'coriander-leaves': '/images/products/coriander.jpg',
+    'mint-leaves': '/images/products/mint.jpg',
+    'amaranth-lal-saag': '/images/products/amaranth.jpg',
+    'potato-aloo': '/images/products/potato.jpg',
+    'onion-pyaaz': '/images/products/onion.jpg',
+    'carrot-gajar': '/images/products/carrot.jpg',
+    'beetroot': '/images/products/beetroot.jpg',
+    'radish-mooli': '/images/products/radish.jpg',
+    'ginger-adrak': '/images/products/ginger.jpg',
+    'garlic-lehsun': '/images/products/garlic.jpg',
+    'bottle-gourd-lauki': '/images/products/bottle-gourd.jpg',
+    'bitter-gourd-karela': '/images/products/bitter-gourd.jpg',
+    'ridge-gourd-tori': '/images/products/ridge-gourd.jpg',
+    'pumpkin-kaddu': '/images/products/pumpkin.jpg',
+    'broccoli': '/images/products/broccoli.jpg',
+    'zucchini': '/images/products/zucchini.jpg',
+    'bell-pepper': '/images/products/bell-pepper.jpg',
+    'mushroom-button': '/images/products/mushroom.jpg',
+    'baby-corn': '/images/products/baby-corn.jpg',
+    'curry-leaves': '/images/products/curry-leaves.jpg',
+    'green-chilli': '/images/products/green-chilli.jpg',
+    'lemongrass': '/images/products/lemongrass.jpg',
+    'banana-kela': '/images/products/banana.jpg',
+    'apple-shimla': '/images/products/apple.jpg',
+    'papaya': '/images/products/papaya.jpg',
+    'pomegranate-anar': '/images/products/pomegranate.jpg',
+    'farm-fresh-eggs': '/images/products/eggs.jpg',
+    'fresh-paneer': '/images/products/paneer.jpg',
+    'curd-dahi': '/images/products/curd.jpg',
+    'organic-tomato': '/images/products/tomato.jpg',
+    'organic-cucumber': '/images/products/cucumber.jpg',
+    'organic-spinach': '/images/products/spinach.jpg',
+  };
+
   const productsWithDefaults = products.map(p => ({
     ...p,
-    images: [],
+    images: imageMap[p.slug] ? [imageMap[p.slug]] : [],
     isAvailable: true,
     trackInventory: true,
     sortOrder: 0,
@@ -955,6 +993,54 @@ async function seedInventoryTransactions(products: any[]) {
   return created;
 }
 
+// ─── Seed Settings ───────────────────────────────────────────────────────────
+
+async function seedSettings() {
+  const settings = await Settings.create({
+    businessName: 'HR Fresh',
+    tagline: 'Farm Fresh, Daily Delivered',
+    contact: {
+      phone: '+919876543210',
+      email: 'orders@hrfresh.com',
+      address: '123, Vegetable Market, Sector 15',
+      city: 'Gurugram',
+      state: 'Haryana',
+      pincode: '122001',
+      country: 'India',
+    },
+    currency: 'INR',
+    currencySymbol: '₹',
+    timezone: 'Asia/Kolkata',
+    language: 'en',
+    invoicePrefix: 'HRF',
+    invoiceStartNumber: 1001,
+    gstNumber: '06AABCH1234M1ZV',
+    theme: {
+      primaryColor: '#16a34a',
+      accentColor: '#4ade80',
+    },
+    businessHours: {
+      openTime: '06:00',
+      closeTime: '21:00',
+      workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    },
+    orderSettings: {
+      minOrderAmount: 99,
+      deliveryCharge: 30,
+      freeDeliveryAbove: 499,
+      acceptOrders: true,
+      orderCutoffTime: '20:00',
+      deliveryMessage: 'Same-day delivery • Order before 8 PM',
+    },
+    notifications: {
+      smsEnabled: true,
+      whatsappEnabled: true,
+      emailEnabled: false,
+    },
+  });
+  console.log(`  ✅ Business settings created (${settings.businessName})`);
+}
+
 // ─── Main Seed Function ──────────────────────────────────────────────────────
 
 async function main() {
@@ -983,6 +1069,7 @@ async function main() {
       DeliveryStaff.deleteMany({}),
       DeliveryAssignment.deleteMany({}),
       InventoryTransaction.deleteMany({}),
+      Settings.deleteMany({}),
     ]);
     console.log('  ✅ All collections cleared\n');
 
@@ -1000,6 +1087,7 @@ async function main() {
     const deliveryStaff = await seedDeliveryStaff(users);
     const orders = await seedOrders(customers, products, users, deliveryStaff, addresses);
     await seedInventoryTransactions(products);
+    await seedSettings();
 
     console.log('\n═══════════════════════════════════════════');
     console.log('🎉 Seed complete! Summary:');
