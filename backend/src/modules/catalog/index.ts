@@ -1,0 +1,10 @@
+export { Category } from './category.model';
+export type { ICategory } from './category.model';
+export { Unit } from './unit.model';
+export type { IUnit } from './unit.model';
+export { Brand } from './brand.model';
+export type { IBrand } from './brand.model';
+export { Product } from './product.model';
+export type { IProduct } from './product.model';
+export { categoryService, unitService, brandService, productService } from './catalog.service';
+export { default as catalogRoutes } from './catalog.routes';
