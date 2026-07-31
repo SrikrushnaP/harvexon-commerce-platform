@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { authService } from './auth.service';
 import { asyncHandler } from '../../common/middleware';
-import { sendSuccess, sendCreated } from '../../common/utils';
+import { sendSuccess, sendCreated, sendNoContent } from '../../common/utils';
 import { AuthRequest } from '../../common/types';
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
@@ -41,4 +41,10 @@ export const changePassword = asyncHandler(async (req: Request, res: Response) =
   const { user } = req as AuthRequest;
   await authService.changePassword(user!.id, req.body.currentPassword, req.body.newPassword);
   sendSuccess(res, null, 'Password changed successfully');
+});
+
+export const deleteAccount = asyncHandler(async (req: Request, res: Response) => {
+  const { user } = req as AuthRequest;
+  await authService.deleteAccount(user!.id);
+  sendNoContent(res);
 });

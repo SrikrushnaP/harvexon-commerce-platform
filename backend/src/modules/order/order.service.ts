@@ -5,6 +5,7 @@ import { Product } from '../catalog';
 import { pricingService } from '../pricing';
 import { couponService } from '../coupon/coupon.service';
 import { Settings } from '../settings/settings.model';
+import { model as getModel } from 'mongoose';
 import { NotFoundError, ValidationError } from '../../common/middleware';
 import { parsePagination, buildPaginationMeta } from '../../common/utils';
 import { PaginationQuery } from '../../common/types';
@@ -230,12 +231,32 @@ class OrderService {
     return { data, pagination: buildPaginationMeta(page, limit, total) };
   }
 
-  async getById(id: string): Promise<IOrder> {
+  async getById(id: string): Promise<any> {
     const order = await Order.findById(id)
       .populate('customer', 'name phone email businessName')
       .populate('items.product', 'name sku images');
     if (!order) throw new NotFoundError('Order');
-    return order;
+
+    // Include delivery assignment info if order is assigned or beyond
+    const orderObj = order.toJSON();
+    const assignedStatuses = ['assigned', 'out_for_delivery', 'delivered'];
+    if (assignedStatuses.includes(order.status)) {
+      const DeliveryAssignment = getModel('DeliveryAssignment');
+      const assignment = await DeliveryAssignment.findOne({ order: id, isActive: true })
+        .populate('deliveryStaff', 'name phone');
+      if (assignment) {
+        (orderObj as any).deliveryAssignment = {
+          id: (assignment as any).id,
+          status: (assignment as any).status,
+          deliveryStaff: (assignment as any).deliveryStaff,
+          assignedAt: (assignment as any).assignedAt,
+          pickedUpAt: (assignment as any).pickedUpAt,
+          deliveredAt: (assignment as any).deliveredAt,
+        };
+      }
+    }
+
+    return orderObj;
   }
 
   async getByOrderNumber(orderNumber: string): Promise<IOrder> {
@@ -250,7 +271,8 @@ class OrderService {
     id: string,
     newStatus: OrderStatus,
     userId?: string,
-    notes?: string
+    notes?: string,
+    deliveryStaffId?: string
   ): Promise<IOrder> {
     const order = await Order.findById(id);
     if (!order) throw new NotFoundError('Order');
@@ -267,6 +289,11 @@ class OrderService {
     // If cancelling, require cancellation reason
     if (newStatus === APP_CONSTANTS.ORDER_STATUS.CANCELLED && !notes) {
       throw new ValidationError('Cancellation reason is required');
+    }
+
+    // If assigning, require delivery staff
+    if (newStatus === APP_CONSTANTS.ORDER_STATUS.ASSIGNED && !deliveryStaffId) {
+      throw new ValidationError('Delivery staff is required when assigning an order');
     }
 
     // Update status and timestamps
@@ -300,12 +327,48 @@ class OrderService {
     order.updatedBy = userId as any;
     await order.save();
 
+    // Create delivery assignment when assigning to a delivery staff
+    if (newStatus === APP_CONSTANTS.ORDER_STATUS.ASSIGNED && deliveryStaffId) {
+      const DeliveryAssignment = getModel('DeliveryAssignment');
+      // Deactivate any existing assignment for this order
+      await DeliveryAssignment.updateMany(
+        { order: id, isActive: true },
+        { isActive: false, updatedBy: userId }
+      );
+      // Create new assignment
+      await DeliveryAssignment.create({
+        order: id,
+        deliveryStaff: deliveryStaffId,
+        status: APP_CONSTANTS.DELIVERY_STATUS.ASSIGNED,
+        assignedAt: now,
+        createdBy: userId,
+      });
+    }
+
     // If delivered, update customer stats
     if (newStatus === APP_CONSTANTS.ORDER_STATUS.DELIVERED) {
       await Customer.findByIdAndUpdate(order.customer, {
         $inc: { totalOrders: 1, totalSpent: order.total },
         $set: { lastOrderDate: now },
       });
+    }
+
+    // Sync delivery assignment status when order status changes
+    const deliveryStatusMap: Partial<Record<OrderStatus, string>> = {
+      [APP_CONSTANTS.ORDER_STATUS.OUT_FOR_DELIVERY]: APP_CONSTANTS.DELIVERY_STATUS.IN_TRANSIT,
+      [APP_CONSTANTS.ORDER_STATUS.DELIVERED]: APP_CONSTANTS.DELIVERY_STATUS.DELIVERED,
+    };
+    const mappedDeliveryStatus = deliveryStatusMap[newStatus];
+    if (mappedDeliveryStatus) {
+      const DeliveryAssignment = getModel('DeliveryAssignment');
+      await DeliveryAssignment.findOneAndUpdate(
+        { order: id, isActive: true },
+        {
+          status: mappedDeliveryStatus,
+          ...(newStatus === APP_CONSTANTS.ORDER_STATUS.DELIVERED ? { deliveredAt: now } : {}),
+          updatedBy: userId,
+        }
+      );
     }
 
     return order.populate([

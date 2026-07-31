@@ -76,5 +76,10 @@ export const updateProfileSchema = z.object({
       .max(15, 'Phone cannot exceed 15 digits')
       .trim()
       .optional(),
+    notificationPreferences: z.object({
+      orderUpdates: z.boolean().optional(),
+      promotions: z.boolean().optional(),
+      deliveryAlerts: z.boolean().optional(),
+    }).optional(),
   }),
 });

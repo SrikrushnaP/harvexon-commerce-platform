@@ -86,7 +86,7 @@ export const getOrderById = asyncHandler(async (req: Request, res: Response) => 
         ...(fullUser?.phone ? [{ phone: fullUser.phone }] : []),
       ],
     });
-    const orderCustomerId = (order as any).customer?._id?.toString() || (order as any).customer?.toString();
+    const orderCustomerId = (order as any).customer?.id?.toString() || (order as any).customer?._id?.toString() || (order as any).customer?.toString();
     if (!customer || orderCustomerId !== (customer._id as any).toString()) {
       res.status(403).json({ success: false, message: 'Access denied' });
       return;
@@ -107,7 +107,8 @@ export const updateOrderStatus = asyncHandler(async (req: Request, res: Response
     getParam(req, 'id'),
     req.body.status,
     user?.id,
-    req.body.notes
+    req.body.notes,
+    req.body.deliveryStaff
   );
   sendSuccess(res, { order }, 'Order status updated');
 });

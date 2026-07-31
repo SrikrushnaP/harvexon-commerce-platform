@@ -12,6 +12,11 @@ export interface IUser extends Document {
   isActive: boolean;
   lastLogin?: Date;
   refreshToken?: string;
+  notificationPreferences?: {
+    orderUpdates: boolean;
+    promotions: boolean;
+    deliveryAlerts: boolean;
+  };
   createdBy?: Schema.Types.ObjectId;
   updatedBy?: Schema.Types.ObjectId;
   createdAt: Date;
@@ -55,6 +60,11 @@ const userSchema = new Schema<IUser>({
   },
   lastLogin: {
     type: Date,
+  },
+  notificationPreferences: {
+    orderUpdates: { type: Boolean, default: true },
+    promotions: { type: Boolean, default: true },
+    deliveryAlerts: { type: Boolean, default: true },
   },
   refreshToken: {
     type: String,

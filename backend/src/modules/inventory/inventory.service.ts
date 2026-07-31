@@ -186,8 +186,7 @@ class InventoryService {
       .populate('category', 'name')
       .populate('brand', 'name')
       .skip(skip)
-      .limit(limit)
-      .lean();
+      .limit(limit);
 
     const totalProducts = await Product.countDocuments(productFilter);
 

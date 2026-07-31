@@ -83,8 +83,7 @@ class DeliveryStaffService {
       DeliveryStaff.find(filter)
         .sort({ [sortField]: sortOrder })
         .skip(skip)
-        .limit(limit)
-        .lean(),
+        .limit(limit),
       DeliveryStaff.countDocuments(filter),
     ]);
 
@@ -239,8 +238,7 @@ class DeliveryAssignmentService {
         .populate('deliveryStaff', 'name phone vehicleType')
         .sort({ [sortField]: sortOrder })
         .skip(skip)
-        .limit(limit)
-        .lean(),
+        .limit(limit),
       DeliveryAssignment.countDocuments(filter),
     ]);
 
@@ -346,8 +344,7 @@ class DeliveryAssignmentService {
         .populate('order', 'orderNumber status customer deliveryAddress')
         .sort({ [sortField]: sortOrder })
         .skip(skip)
-        .limit(limit)
-        .lean(),
+        .limit(limit),
       DeliveryAssignment.countDocuments(filter),
     ]);
 

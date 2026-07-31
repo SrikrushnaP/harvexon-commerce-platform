@@ -27,6 +27,15 @@ const adminRoles = [
   APP_CONSTANTS.ROLES.MANAGER,
 ];
 
+// Base inventory route — returns stock report (product list with stock levels)
+router.get(
+  '/',
+  authenticate,
+  authorize(...staffRoles),
+  validate(getStockReportSchema),
+  inventoryController.getStockReport
+);
+
 // List transactions
 router.get(
   '/transactions',

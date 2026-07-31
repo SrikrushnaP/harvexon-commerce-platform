@@ -187,7 +187,7 @@ class AuthService {
   /**
    * Update user profile
    */
-  async updateProfile(userId: string, data: Partial<{ name: string; phone: string }>): Promise<IUser> {
+  async updateProfile(userId: string, data: Partial<{ name: string; phone: string; notificationPreferences: { orderUpdates?: boolean; promotions?: boolean; deliveryAlerts?: boolean } }>): Promise<IUser> {
     // Check phone uniqueness if being updated
     if (data.phone) {
       const existing = await User.findOne({ phone: data.phone, _id: { $ne: userId } });
@@ -201,6 +201,17 @@ class AuthService {
       throw new UnauthorizedError('User not found');
     }
     return user;
+  }
+
+  /**
+   * Soft-delete user account
+   */
+  async deleteAccount(userId: string): Promise<void> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new UnauthorizedError('User not found');
+    }
+    await (user as any).softDelete(userId);
   }
 }
 
