@@ -60,18 +60,22 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog.componen
                       <span class="address-phone">📞 {{ addr.phone }}</span>
                     }
                   </div>
-                  <button class="delete-btn" (click)="deleteAddress(addr.id)">🗑️</button>
+                  <div class="address-actions">
+                    <button class="edit-btn" (click)="editAddress(addr)">✏️</button>
+                    <button class="delete-btn" (click)="deleteAddress(addr.id)">🗑️</button>
+                  </div>
                 </div>
               } @empty {
                 <div class="empty-row">No addresses saved yet</div>
               }
 
               @if (!showAddressForm()) {
-                <button class="add-btn" (click)="showAddressForm.set(true)">+ Add New Address</button>
+                <button class="add-btn" (click)="startAddAddress()">+ Add New Address</button>
               }
 
               @if (showAddressForm()) {
                 <form class="address-form" [formGroup]="addressForm" (ngSubmit)="saveAddress()">
+                  <h4 class="form-title">{{ editingAddressId() ? 'Edit Address' : 'New Address' }}</h4>
                   <div class="form-grid">
                     <div class="form-group">
                       <label>Label</label>
@@ -99,9 +103,9 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog.componen
                     </div>
                   </div>
                   <div class="form-actions">
-                    <button type="button" class="cancel-btn" (click)="showAddressForm.set(false)">Cancel</button>
+                    <button type="button" class="cancel-btn" (click)="cancelAddressForm()">Cancel</button>
                     <button type="submit" class="save-btn" [disabled]="addressForm.invalid || savingAddress()">
-                      {{ savingAddress() ? 'Saving...' : 'Save' }}
+                      {{ savingAddress() ? 'Saving...' : (editingAddressId() ? 'Update' : 'Save') }}
                     </button>
                   </div>
                 </form>
@@ -442,6 +446,30 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog.componen
     .delete-btn:hover {
       opacity: 1;
     }
+    .edit-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+      opacity: 0.6;
+      transition: opacity 0.15s;
+    }
+    .edit-btn:hover {
+      opacity: 1;
+    }
+    .address-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .form-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin: 0 0 10px;
+    }
     .add-btn {
       display: block;
       width: 100%;
@@ -603,6 +631,7 @@ export class ProfilePage implements OnInit {
   showAddresses = signal(false);
   showAddressForm = signal(false);
   savingAddress = signal(false);
+  editingAddressId = signal<string | null>(null);
 
   // Settings
   showSettings = signal(false);
@@ -723,22 +752,58 @@ export class ProfilePage implements OnInit {
     });
   }
 
+  startAddAddress() {
+    this.editingAddressId.set(null);
+    this.addressForm.reset();
+    this.showAddressForm.set(true);
+  }
+
+  editAddress(addr: Address) {
+    this.editingAddressId.set(addr.id);
+    this.addressForm.patchValue({
+      label: addr.label || '',
+      line1: addr.line1,
+      city: addr.city,
+      state: addr.state,
+      pincode: addr.pincode,
+      phone: addr.phone || '',
+    });
+    this.showAddressForm.set(true);
+  }
+
+  cancelAddressForm() {
+    this.showAddressForm.set(false);
+    this.editingAddressId.set(null);
+    this.addressForm.reset();
+  }
+
   async saveAddress() {
     if (this.addressForm.invalid) return;
     this.savingAddress.set(true);
     const body = this.addressForm.getRawValue();
+    const payload = {
+      label: body.label || undefined,
+      line1: body.line1,
+      city: body.city,
+      state: body.state,
+      pincode: body.pincode,
+      phone: body.phone || undefined,
+    };
     try {
-      const addr = await this.addressService.saveAddress({
-        label: body.label || undefined,
-        line1: body.line1,
-        city: body.city,
-        state: body.state,
-        pincode: body.pincode,
-        phone: body.phone || undefined,
-      });
-      if (addr) {
-        this.showAddressForm.set(false);
-        this.addressForm.reset();
+      const editId = this.editingAddressId();
+      if (editId) {
+        const updated = await this.addressService.updateAddress(editId, payload);
+        if (updated) {
+          this.showAddressForm.set(false);
+          this.editingAddressId.set(null);
+          this.addressForm.reset();
+        }
+      } else {
+        const addr = await this.addressService.saveAddress(payload);
+        if (addr) {
+          this.showAddressForm.set(false);
+          this.addressForm.reset();
+        }
       }
     } finally {
       this.savingAddress.set(false);

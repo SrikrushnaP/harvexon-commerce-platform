@@ -14,6 +14,11 @@ interface Unit {
   shortName: string;
 }
 
+interface Brand {
+  id: string;
+  name: string;
+}
+
 @Component({
   selector: 'app-catalog-form',
   standalone: true,
@@ -90,8 +95,19 @@ interface Unit {
               </div>
               <div class="form-group">
                 <label for="brand">Brand</label>
-                <input id="brand" formControlName="brand" type="text" placeholder="Brand ID (optional)" />
+                <select id="brand" formControlName="brand">
+                  <option value="">No brand</option>
+                  @for (brand of brands(); track brand.id) {
+                    <option [value]="brand.id">{{ brand.name }}</option>
+                  }
+                </select>
               </div>
+            </div>
+
+            <div class="form-group">
+              <label for="images">Product Images (URLs, one per line)</label>
+              <textarea id="images" formControlName="images" rows="3" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+              <span class="hint">Enter image URLs, one per line</span>
             </div>
           </div>
 
@@ -252,6 +268,11 @@ interface Unit {
       color: #dc2626;
       margin-top: 0.25rem;
     }
+    .hint {
+      font-size: 0.7rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
     .form-error {
       background: #fef2f2;
       border: 1px solid #fecaca;
@@ -283,6 +304,7 @@ export class CatalogFormPage implements OnInit {
   errorMessage = signal('');
   categories = signal<Category[]>([]);
   units = signal<Unit[]>([]);
+  brands = signal<Brand[]>([]);
 
   private productId = '';
 
@@ -294,6 +316,7 @@ export class CatalogFormPage implements OnInit {
     unit: ['', Validators.required],
     basePrice: [0, [Validators.required, Validators.min(0)]],
     brand: [''],
+    images: [''],
     sortOrder: [0],
     tags: [''],
     isAvailable: [true],
@@ -305,6 +328,7 @@ export class CatalogFormPage implements OnInit {
   ngOnInit() {
     this.loadCategories();
     this.loadUnits();
+    this.loadBrands();
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -326,6 +350,12 @@ export class CatalogFormPage implements OnInit {
     });
   }
 
+  loadBrands() {
+    this.api.get<{ brands: Brand[] }>('/catalog/brands').subscribe({
+      next: (res) => this.brands.set(res.data?.brands || []),
+    });
+  }
+
   loadProduct(id: string) {
     this.loading.set(true);
     this.api.get<any>(`/catalog/products/${id}`).subscribe({
@@ -340,6 +370,7 @@ export class CatalogFormPage implements OnInit {
             unit: p.unit?.id || p.unit || '',
             basePrice: p.basePrice || 0,
             brand: p.brand?.id || p.brand || '',
+            images: (p.images || []).join('\n'),
             sortOrder: p.sortOrder || 0,
             tags: (p.tags || []).join(', '),
             isAvailable: p.isAvailable ?? true,
@@ -384,6 +415,9 @@ export class CatalogFormPage implements OnInit {
     if (formValue.brand) body.brand = formValue.brand;
     if (formValue.tags) {
       body.tags = formValue.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t);
+    }
+    if (formValue.images) {
+      body.images = formValue.images.split('\n').map((u: string) => u.trim()).filter((u: string) => u);
     }
 
     const request$ = this.isEdit()

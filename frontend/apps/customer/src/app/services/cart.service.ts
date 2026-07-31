@@ -169,7 +169,7 @@ export class CartService {
   private updateFromBackend(data: any) {
     if (!data?.items) return;
     const items: CartItem[] = data.items.map((i: any) => ({
-      _id: i._id,
+      _id: i.id || i._id,
       productId: i.productId,
       name: i.name,
       slug: i.slug,

@@ -10,6 +10,7 @@ export interface IAddress extends Document {
   state: string;
   pincode: string;
   landmark?: string;
+  phone?: string;
   location?: {
     lat?: number;
     lng?: number;
@@ -66,6 +67,11 @@ const addressSchema = new Schema<IAddress>({
     type: String,
     trim: true,
     maxlength: [200, 'Landmark cannot exceed 200 characters'],
+  },
+  phone: {
+    type: String,
+    trim: true,
+    maxlength: [15, 'Phone cannot exceed 15 characters'],
   },
   location: {
     lat: { type: Number },

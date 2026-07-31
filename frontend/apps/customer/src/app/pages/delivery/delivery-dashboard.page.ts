@@ -4,9 +4,9 @@ import { DatePipe } from '@angular/common';
 import { ApiService, AuthService } from '@frontend/shared-data-access';
 
 interface DeliveryAssignment {
-  _id: string;
+  id: string;
   order: { orderNumber: string; customer: { name: string }; deliveryAddress: { line1: string; city: string; pincode: string }; total: number; };
-  deliveryStaff: { _id: string; name: string };
+  deliveryStaff: { id: string; name: string };
   status: 'pending' | 'assigned' | 'picked_up' | 'in_transit' | 'delivered' | 'failed';
   assignedAt: string; pickedUpAt?: string; deliveredAt?: string;
 }
@@ -68,8 +68,8 @@ interface DeliveryAssignment {
         </div>
       } @else {
         <div class="assignments-list">
-          @for (item of assignments(); track item._id) {
-            <a [routerLink]="['/delivery', item._id]" class="assignment-card" [class]="'border-' + item.status">
+          @for (item of assignments(); track item.id) {
+            <a [routerLink]="['/delivery', item.id]" class="assignment-card" [class]="'border-' + item.status">
               <div class="card-top">
                 <span class="order-number">#{{ item.order.orderNumber }}</span>
                 <span class="status-pill" [class]="'pill-' + item.status">

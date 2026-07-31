@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '@frontend/shared-data-access';
 
 interface DeliveryAssignment {
-  _id: string;
+  id: string;
   order: {
     orderNumber: string;
     customer: { name: string };
@@ -13,7 +13,7 @@ interface DeliveryAssignment {
     items?: { name: string; quantity: number; price: number }[];
     total: number;
   };
-  deliveryStaff: { _id: string; name: string };
+  deliveryStaff: { id: string; name: string };
   status: 'pending' | 'assigned' | 'picked_up' | 'in_transit' | 'delivered' | 'failed';
   assignedAt: string;
   pickedUpAt?: string;
@@ -696,7 +696,7 @@ export class DeliveryTaskPage implements OnInit {
     if (!nextStatus) return;
 
     this.updating.set(true);
-    this.api.patch<DeliveryAssignment>('/delivery/assignments/' + current._id + '/status', {
+    this.api.patch<DeliveryAssignment>('/delivery/assignments/' + current.id + '/status', {
       status: nextStatus,
     }).subscribe({
       next: (res) => {
@@ -719,7 +719,7 @@ export class DeliveryTaskPage implements OnInit {
     if (!current || !this.failureReason) return;
 
     this.updating.set(true);
-    this.api.patch<DeliveryAssignment>('/delivery/assignments/' + current._id + '/status', {
+    this.api.patch<DeliveryAssignment>('/delivery/assignments/' + current.id + '/status', {
       status: 'failed',
       failureReason: this.failureReason,
     }).subscribe({
