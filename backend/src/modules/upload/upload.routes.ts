@@ -15,30 +15,15 @@ const adminRoles = [
   APP_CONSTANTS.ROLES.MANAGER,
 ];
 
-// Ensure uploads directory exists
-const uploadDir = config.upload.dir;
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Multer disk storage configuration
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const ext = path.extname(file.originalname);
-    cb(null, `${uniqueSuffix}${ext}`);
-  },
-});
+// Use memory storage — images are processed by sharp before saving
+const storage = multer.memoryStorage();
 
 // File filter for allowed image types
 const fileFilter = (_req: Request, file: Express.Multer.File, cb: FileFilterCallback): void => {
   if (APP_CONSTANTS.ALLOWED_IMAGE_TYPES.includes(file.mimetype as typeof APP_CONSTANTS.ALLOWED_IMAGE_TYPES[number])) {
     cb(null, true);
   } else {
-    cb(new Error(`Invalid file type. Allowed types: ${APP_CONSTANTS.ALLOWED_IMAGE_TYPES.join(', ')}`));
+    cb(new Error(`Invalid file type. Allowed: ${APP_CONSTANTS.ALLOWED_IMAGE_TYPES.join(', ')}`));
   }
 };
 
@@ -50,7 +35,7 @@ const upload = multer({
   },
 });
 
-// POST /api/upload/image — single image upload
+// POST /api/upload/image — single image upload (validates, resizes, converts to webp)
 router.post(
   '/image',
   authenticate,

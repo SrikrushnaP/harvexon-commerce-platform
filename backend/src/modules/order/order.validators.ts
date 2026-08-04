@@ -42,6 +42,7 @@ export const updateStatusSchema = z.object({
       { required_error: 'Status is required' }
     ),
     notes: z.string().max(500).optional(),
+    deliveryStaff: mongoId.optional(),
   }),
   params: z.object({
     id: mongoId,

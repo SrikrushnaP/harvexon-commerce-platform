@@ -40,11 +40,16 @@ app.use(express.urlencoded({ extended: true }));
 // NoSQL injection sanitization
 app.use(mongoSanitize());
 
-// Rate limiting for auth routes
+// Rate limiting for auth routes (login/register only — not profile/address operations)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: { success: false, message: 'Too many attempts, please try again later' },
+  skip: (req) => {
+    // Only rate-limit unauthenticated endpoints (login, register, forgot-password)
+    const rateLimitedPaths = ['/login', '/register', '/forgot-password', '/reset-password'];
+    return !rateLimitedPaths.some((p) => req.path === p);
+  },
 });
 
 // Logging

@@ -11,47 +11,86 @@ import { PincodeService } from './services/pincode.service';
   imports: [RouterModule],
   template: `
     <!-- Header -->
-    <header class="app-header">
-      <a routerLink="/" class="header-brand" aria-label="Go to home page">
-        <span class="brand-name">{{ settings.businessName() }}</span>
-      </a>
+    <div class="header-wrapper">
+      <header class="app-header">
+        <a routerLink="/" class="header-brand" aria-label="Go to home page">
+          <span class="brand-name">{{ settings.businessName() }}</span>
+        </a>
 
-      <!-- Pincode Selector -->
-      <button class="pincode-trigger" (click)="togglePincodeDropdown()" aria-label="Change delivery pincode">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        @if (pincodeService.pincode()) {
-          <span class="pincode-text">{{ pincodeService.pincode() }}</span>
-          @if (pincodeService.isServiceable() === true) {
-            <span class="pincode-status ok">✓</span>
-          } @else if (pincodeService.isServiceable() === false) {
-            <span class="pincode-status fail">✗</span>
+        <!-- Desktop Navigation -->
+        <nav class="desktop-nav" aria-label="Main navigation">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="desktop-nav-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Home
+          </a>
+          <a routerLink="/catalog" routerLinkActive="active" class="desktop-nav-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>
+            </svg>
+            Catalog
+          </a>
+          <a routerLink="/cart" routerLinkActive="active" class="desktop-nav-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            Cart
+            @if (cart.cartCount() > 0) {
+              <span class="desktop-cart-badge">{{ cart.cartCount() }}</span>
+            }
+          </a>
+          <a routerLink="/orders" routerLinkActive="active" class="desktop-nav-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Orders
+          </a>
+        </nav>
+
+        <!-- Pincode Selector -->
+        <button class="pincode-trigger" (click)="togglePincodeDropdown()" aria-label="Change delivery pincode">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          @if (pincodeService.pincode()) {
+            <span class="pincode-text">{{ pincodeService.pincode() }}</span>
+            @if (pincodeService.isServiceable() === true) {
+              <span class="pincode-status ok">✓</span>
+            } @else if (pincodeService.isServiceable() === false) {
+              <span class="pincode-status fail">✗</span>
+            }
+          } @else {
+            <span class="pincode-text placeholder">Enter pincode</span>
           }
-        } @else {
-          <span class="pincode-text placeholder">Enter pincode</span>
-        }
-        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </button>
+          <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
 
-      <div class="header-actions">
-        <button class="header-icon-btn" aria-label="Notifications">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-        </button>
-        <button class="header-avatar" aria-label="Profile" (click)="navigateToProfile()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-        </button>
-      </div>
-    </header>
+        <div class="header-actions">
+          <button class="header-icon-btn" aria-label="Notifications">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </button>
+          <button class="header-avatar" aria-label="Profile" (click)="navigateToProfile()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+    </div>
 
     <!-- Pincode Dropdown -->
     @if (showPincodeDropdown()) {
@@ -163,17 +202,22 @@ import { PincodeService } from './services/pincode.service';
     }
 
     /* --- Header --- */
-    .app-header {
+    .header-wrapper {
       position: sticky;
       top: 0;
       z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .app-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       height: var(--header-height, 56px);
       padding: 0 16px;
-      background: #ffffff;
-      border-bottom: 1px solid var(--gray-100, #f3f4f6);
     }
 
     .header-brand {
@@ -185,13 +229,71 @@ import { PincodeService } from './services/pincode.service';
 
     .brand-name {
       font-size: 20px;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--gray-800, #1f2937);
-      letter-spacing: -0.3px;
+      letter-spacing: -0.5px;
     }
 
     .brand-accent {
       color: var(--primary, #10b981);
+    }
+
+    /* --- Desktop Nav (hidden on mobile) --- */
+    .desktop-nav {
+      display: none;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      background: var(--gray-50, #f8fafc);
+      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .desktop-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 18px;
+      border-radius: 9px;
+      text-decoration: none;
+      color: var(--gray-500, #6b7280);
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 180ms ease;
+      position: relative;
+
+      svg { flex-shrink: 0; opacity: 0.7; transition: opacity 180ms; }
+
+      &:hover {
+        color: var(--gray-800, #1f2937);
+        background: #ffffff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        svg { opacity: 1; }
+      }
+
+      &.active {
+        color: #ffffff;
+        background: linear-gradient(135deg, #10b981, #059669);
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        svg { opacity: 1; stroke: #ffffff; }
+      }
+    }
+
+    .desktop-cart-badge {
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--error, #ef4444);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1;
+      border-radius: 9999px;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
     }
 
     .header-actions {
@@ -206,13 +308,14 @@ import { PincodeService } from './services/pincode.service';
       justify-content: center;
       width: 38px;
       height: 38px;
-      border-radius: 50%;
+      border-radius: 10px;
       color: var(--gray-600, #4b5563);
-      transition: background 150ms ease, color 150ms ease;
+      transition: all 150ms ease;
 
       &:hover {
         background: var(--gray-100, #f3f4f6);
         color: var(--gray-800, #1f2937);
+        transform: translateY(-1px);
       }
     }
 
@@ -220,16 +323,18 @@ import { PincodeService } from './services/pincode.service';
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: var(--primary-light, #ecfdf5);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
       color: var(--primary, #10b981);
-      transition: background 150ms ease;
+      transition: all 150ms ease;
 
       &:hover {
-        background: var(--primary, #10b981);
+        background: linear-gradient(135deg, #10b981, #059669);
         color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
       }
     }
 
@@ -515,6 +620,76 @@ import { PincodeService } from './services/pincode.service';
 
     .not-serviceable-banner button:hover {
       background: #fef3c7;
+    }
+
+    /* =======================
+       DESKTOP LAYOUT (768px+)
+       ======================= */
+    @media (min-width: 768px) {
+      .header-wrapper {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      }
+
+      .app-header {
+        height: 68px;
+        padding: 0 32px;
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+        gap: 24px;
+      }
+
+      :host {
+        --header-height: 68px;
+      }
+
+      .brand-name {
+        font-size: 22px;
+        font-weight: 800;
+      }
+
+      .desktop-nav {
+        display: flex;
+      }
+
+      .pincode-trigger {
+        max-width: 180px;
+        padding: 8px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+      }
+
+      .header-actions {
+        gap: 10px;
+      }
+
+      .header-icon-btn {
+        width: 40px;
+        height: 40px;
+      }
+
+      .header-avatar {
+        width: 38px;
+        height: 38px;
+      }
+
+      /* Hide bottom nav on desktop */
+      .bottom-nav {
+        display: none;
+      }
+
+      /* Remove bottom padding since no bottom nav */
+      .app-content {
+        padding-bottom: 0;
+      }
+    }
+
+    /* Wide desktop - constrain header with full-width background */
+    @media (min-width: 1024px) {
+      .app-header {
+        padding: 0 48px;
+      }
     }
   `]
 })

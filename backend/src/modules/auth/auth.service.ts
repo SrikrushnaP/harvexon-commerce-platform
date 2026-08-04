@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { config } from '../../config';
 import { User, IUser } from './user.model';
 import { AppError, ConflictError, UnauthorizedError } from '../../common/middleware';
+import { emailService } from '../../common/services';
 
 interface TokenPayload {
   id: string;
@@ -77,6 +78,9 @@ class AuthService {
     const userObj: any = user.toJSON();
     delete userObj.password;
     delete userObj.refreshToken;
+
+    // Send welcome email (fire and forget)
+    emailService.sendWelcome(user.email, user.name);
 
     return { user: userObj as IUser, tokens };
   }

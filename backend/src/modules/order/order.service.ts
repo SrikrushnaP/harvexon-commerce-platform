@@ -2,6 +2,7 @@ import { Order, IOrder } from './order.model';
 import { Customer } from '../customer';
 import { Address } from '../customer';
 import { Product } from '../catalog';
+import { User } from '../auth';
 import { pricingService } from '../pricing';
 import { couponService } from '../coupon/coupon.service';
 import { Settings } from '../settings/settings.model';
@@ -10,6 +11,7 @@ import { NotFoundError, ValidationError } from '../../common/middleware';
 import { parsePagination, buildPaginationMeta } from '../../common/utils';
 import { PaginationQuery } from '../../common/types';
 import { APP_CONSTANTS, OrderStatus } from '../../config';
+import { emailService } from '../../common/services';
 
 // Valid status transitions map
 const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
@@ -196,6 +198,17 @@ class OrderService {
       await couponService.applyCoupon(couponId, data.customer, order.id);
     }
 
+    // Send order confirmation email (fire and forget)
+    const orderCustomer = await User.findById(order.customer).select('email name');
+    if (orderCustomer) {
+      emailService.sendOrderConfirmation(orderCustomer.email, {
+        orderNumber: order.orderNumber,
+        items: order.items as any,
+        total: order.total,
+        deliveryAddress: order.deliveryAddress,
+      });
+    }
+
     return order.populate([
       { path: 'customer', select: 'name phone email' },
       { path: 'items.product', select: 'name sku images' },
@@ -369,6 +382,20 @@ class OrderService {
           updatedBy: userId,
         }
       );
+    }
+
+    // Send status update email (fire and forget)
+    const statusMessages: Record<string, string> = {
+      confirmed: 'Your order has been confirmed and will be processed shortly.',
+      processing: 'Your order is being processed.',
+      packed: 'Your order has been packed and is ready for delivery.',
+      out_for_delivery: 'Your order is out for delivery!',
+      delivered: 'Your order has been delivered. Enjoy!',
+      cancelled: 'Your order has been cancelled.',
+    };
+    const cust = await User.findById(order.customer).select('email name');
+    if (cust && statusMessages[newStatus]) {
+      emailService.sendOrderStatusUpdate(cust.email, order.orderNumber, newStatus, statusMessages[newStatus]);
     }
 
     return order.populate([
